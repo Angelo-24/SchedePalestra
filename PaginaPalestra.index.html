@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lupa Sport Club</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            background-image: url('C:/Users/Angelo De Domenico/Downloads/15105-Lupa-Sport-Club-Hh3pT.jpg');  /* Percorso dell'immagine */
+            background-size: cover; /* Fa in modo che l'immagine copra tutta la pagina */
+            background-position: center; /* Centra l'immagine */
+            background-repeat: no-repeat; /* Non ripete l'immagine */
+            background-attachment: fixed; /* Fissa l'immagine mentre scrolli */
+            height: 100vh; /* Imposta l'altezza al 100% della finestra del browser */
+        }
+        header {
+            background-color: #333; /* Colore grigio scuro */
+            color: white; /* Testo bianco */
+            padding: 15px 20px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+        main {
+            padding: 20px;
+            z-index: 10;
+            position: relative;
+        }
+        .hidden {
+            display: none;
+        }
+        .form-container, .admin-container, .scheda-container {
+            max-width: 400px;
+            margin: 50px auto;  /* Sposta il contenitore un po' più in basso */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);  /* Aggiungi trasparenza al fondo per migliorare la leggibilità */
+            box-shadow: 0 4px 6px rgba(177, 72, 72, 0.1);
+            border-radius: 8px;
+        }
+        .form-container input, .form-container button, .admin-container textarea, .admin-container button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 8px;  /* Ridotto il padding per i campi di input per accorciarli */
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lupa Sport Club</h1>
+        <h1>Sezione Schede</h1>
+    </header>
+    <main>
+        <!-- Sezione di login -->
+        <div id="loginSection" class="form-container">
+            <h2>Accedi</h2>
+            <input type="text" id="loginUsername" placeholder="Nome utente" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button id="submitLogin">Accedi</button>
+            <button id="showRegister">Non hai un account? Registrati</button>
+        </div>
+
+        <!-- Sezione di registrazione -->
+        <div id="registerSection" class="form-container hidden">
+            <h2>Registrati</h2>
+            <input type="text" id="registerUsername" placeholder="Nome utente" required>
+            <input type="password" id="registerPassword" placeholder="Password" required>
+            <button id="submitRegister">Registrati</button>
+            <button id="showLogin">Hai già un account? Accedi</button>
+        </div>
+
+        <!-- Sezione utente -->
+        <div id="userSection" class="scheda-container hidden">
+            <h2>Benvenuto, <span id="usernameDisplay"></span>!</h2>
+            <h3>La tua scheda:</h3>
+            <p id="schedaDisplay">Nessuna scheda assegnata.</p>
+            <button id="logout">Logout</button>
+        </div>
+
+        <!-- Sezione amministratore -->
+        <div id="adminSection" class="admin-container hidden">
+            <h2>Amministratore</h2>
+            <input type="text" id="assignUsername" placeholder="Nome utente">
+            <textarea id="assignScheda" placeholder="Inserisci la scheda"></textarea>
+            <button id="assignButton">Assegna scheda</button>
+            <button id="logoutAdmin">Logout</button>
+        </div>
+    </main>
+
+    <script>
+        // Riferimenti al DOM
+        const loginSection = document.getElementById('loginSection');
+        const registerSection = document.getElementById('registerSection');
+        const userSection = document.getElementById('userSection');
+        const adminSection = document.getElementById('adminSection');
+
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+        const submitLogin = document.getElementById('submitLogin');
+
+        const registerUsername = document.getElementById('registerUsername');
+        const registerPassword = document.getElementById('registerPassword');
+        const submitRegister = document.getElementById('submitRegister');
+
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const schedaDisplay = document.getElementById('schedaDisplay');
+        const logout = document.getElementById('logout');
+        const logoutAdmin = document.getElementById('logoutAdmin');
+
+        const assignUsername = document.getElementById('assignUsername');
+        const assignScheda = document.getElementById('assignScheda');
+        const assignButton = document.getElementById('assignButton');
+
+        // Simulazione di database usando localStorage
+        const users = JSON.parse(localStorage.getItem('users')) || {};
+        let currentUser = localStorage.getItem('currentUser') || null;
+
+        // Mostra una sezione specifica
+        function showSection(section) {
+            loginSection.classList.add('hidden');
+            registerSection.classList.add('hidden');
+            userSection.classList.add('hidden');
+            adminSection.classList.add('hidden');
+            section.classList.remove('hidden');
+        }
+
+        // Controlla se l'utente è già loggato
+        document.addEventListener('DOMContentLoaded', () => {
+            if (currentUser) {
+                if (currentUser === 'admin') {
+                    showSection(adminSection);
+                } else {
+                    usernameDisplay.textContent = currentUser;
+                    schedaDisplay.textContent = users[currentUser]?.scheda || 'Nessuna scheda assegnata.';
+                    showSection(userSection);
+                }
+            } else {
+                showSection(loginSection);
+            }
+        });
+
+        // Login
+        submitLogin.addEventListener('click', () => {
+            const username = loginUsername.value;
+            const password = loginPassword.value;
+
+            if (username === 'admin' && password === 'admin') {
+                currentUser = 'admin';
+                localStorage.setItem('currentUser', currentUser);
+                showSection(adminSection);
+            } else if (users[username] && users[username].password === password) {
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                usernameDisplay.textContent = username;
+                schedaDisplay.textContent = users[username]?.scheda || 'Nessuna scheda assegnata.';
+                showSection(userSection);
+            } else {
+                alert('Credenziali non valide!');
+            }
+        });
+
+        // Registrazione
+        submitRegister.addEventListener('click', () => {
+            const username = registerUsername.value;
+            const password = registerPassword.value;
+
+            if (users[username]) {
+                alert('Questo nome utente è già registrato!');
+            } else if (username && password) {
+                users[username] = { password, scheda: '' };
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('Registrazione completata!');
+                showSection(loginSection);
+            } else {
+                alert('Inserisci tutti i campi!');
+            }
+        });
+
+        // Assegna scheda (Amministratore)
+        assignButton.addEventListener('click', () => {
+            const username = assignUsername.value;
+            const scheda = assignScheda.value;
+
+            if (users[username]) {
+                users[username].scheda = scheda;
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('Scheda assegnata con successo!');
+            } else {
+                alert('Utente non trovato!');
+            }
+        });
+
+        // Logout
+        logout.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showSection(loginSection);
+        });
+
+        logoutAdmin.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showSection(loginSection);
+        });
+
+        // Mostra la sezione di registrazione
+        document.getElementById('showRegister').addEventListener('click', () => showSection(registerSection));
+
+        // Mostra la sezione di login
+        document.getElementById('showLogin').addEventListener('click', () => showSection(loginSection));
+    </script>
+</body>
+</html>
